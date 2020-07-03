@@ -1,6 +1,9 @@
 # Use Caffe2 image as parent image
 FROM caffe2/caffe2:snapshot-py2-cuda9.0-cudnn7-ubuntu16.04
 
+# make sure that the shell doesn't try to interact with you during setup
+ENV DEBIAN_FRONTEND=noninteractive 
+
 RUN mv /usr/local/caffe2 /usr/local/caffe2_build
 ENV Caffe2_DIR /usr/local/caffe2_build
 
@@ -43,7 +46,15 @@ RUN wget -P /detectron/checkpoint/ https://dl.fbaipublicfiles.com/video-pose-3d/
 RUN mkdir /detectron/weights
 RUN wget -P /detectron/weights/ https://dl.fbaipublicfiles.com/detectron/37698009/12_2017_baselines/e2e_keypoint_rcnn_R-101-FPN_s1x.yaml.08_45_57.YkrJgP6O/output/train/keypoints_coco_2014_train:keypoints_coco_2014_valminusminival/generalized_rcnn/model_final.pkl
 
+RUN mkdir /VideoPose3D/checkpoint
+RUN cp /detectron/checkpoint/pretrained_h36m_detectron_coco.bin /VideoPose3D/checkpoint/
 
+RUN pip install h5py
 
-# [Optional] Build custom ops
-#RUN make ops
+# So we can use add-apt-repository
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get install -y python3.6 python3-pip python3-matplotlib
+
+RUN pip3 install h5py numpy==1.14.6 torch
